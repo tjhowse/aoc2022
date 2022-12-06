@@ -28,6 +28,15 @@ func (s *stack) dupe() bool {
 	return false
 }
 
+func better_dupe(s string) bool {
+	for _, r := range s {
+		if strings.Count(s, string(r)) > 1 {
+			return false
+		}
+	}
+	return true
+}
+
 func main() {
 	// b := tj.FileToSlice("input")
 	b := tj.FileToSlice("input_real")
@@ -42,13 +51,21 @@ func main() {
 	// }
 	input := b[0]
 
-	s := stack{s: "000000000000000"}
-	for i := 0; i < len(input); i++ {
-		// println(string(input[i]))
-		s.push(string(input[i]))
-		// s.print()
-		if !s.dupe() && i >= 4 {
-			print(i + 1)
+	// First, dumb, solution
+	// s := stack{s: "000000000000000"}
+	// for i := 0; i < len(input); i++ {
+	// 	s.push(string(input[i]))
+	// 	if !s.dupe() && i >= 4 {
+	// 		print(i + 1)
+	// 		return
+	// 	}
+	// }
+
+	// Much clearer solution
+	n := 14
+	for i := n; i < len(input); i++ {
+		if better_dupe(input[i-n : i]) {
+			print(i)
 			return
 		}
 	}
