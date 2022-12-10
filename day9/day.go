@@ -6,7 +6,7 @@ import (
 	tj "github.com/tjhowse/tjgo"
 )
 
-const MapSize = 6
+const MapSize = 21
 
 type vec2 struct {
 	x int
@@ -16,31 +16,74 @@ type vec2 struct {
 func (v *vec2) distance(v2 *vec2) float64 {
 	return math.Sqrt(math.Pow(math.Abs(float64(v.x-v2.x)), 2) + math.Pow(math.Abs(float64(v.y-v2.y)), 2))
 }
+func (v *vec2) distance2(v2 *vec2) int {
+	return int(math.Abs(float64(v.x-v2.x)) + math.Abs(float64(v.y-v2.y)))
+}
+
+const SnakeLength = 10
 
 type snake struct {
-	head vec2
-	tail vec2
+	body [SnakeLength]vec2
 }
 
 func (s *snake) move(dir string, dist int, tp *map[vec2]bool) {
 	// println("move ", dir, " ", dist, " ")
 	for i := 0; i < dist; i++ {
-		head_start := s.head
+		// prev_segment_original := s.body[0]
 		switch dir {
 		case "U":
-			s.head.y++
+			s.body[0].y++
 		case "D":
-			s.head.y--
+			s.body[0].y--
 		case "L":
-			s.head.x--
+			s.body[0].x--
 		case "R":
-			s.head.x++
+			s.body[0].x++
 		}
-		// println(s.head.distance(&s.tail))
-		if s.head.distance(&s.tail) > 1.5 {
-			s.tail = head_start
+		for j := 1; j < SnakeLength; j++ {
+			// temp := s.body[j]
+			dist := s.body[j].distance(&s.body[j-1])
+			if dist > 1.5 {
+				if s.body[j-1].x > s.body[j].x {
+					s.body[j].x++
+				} else if s.body[j-1].x < s.body[j].x {
+					s.body[j].x--
+				}
+				if s.body[j-1].y > s.body[j].y {
+					s.body[j].y++
+				} else if s.body[j-1].y < s.body[j].y {
+					s.body[j].y--
+				}
+			}
+			// println(dist)
+			// switch int(dist) {
+			// case 0:
+			// 	// Overlap, Do nothing
+			// case 1:
+			// 	// Orthogonally or diagonally adjacent, do nothing
+			// case 2:
+			// 	fallthrough
+			// case 3:
+			// 	// Horizontally or vertically distant
+			// 	println("Horiz/Vert")
+			// 	s.body[j] = prev_segment_original
+			// case 4:
+			// 	// Diagonally distant move diagonally towards body[j-1]
+			// 	println("Diag")
+			// 	if s.body[j-1].x > s.body[j].x {
+			// 		s.body[j].x++
+			// 	} else {
+			// 		s.body[j].x--
+			// 	}
+			// 	if s.body[j-1].y > s.body[j].y {
+			// 		s.body[j].y++
+			// 	} else {
+			// 		s.body[j].y--
+			// 	}
+			// }
+			// prev_segment_original = temp
 		}
-		(*tp)[s.tail] = true
+		(*tp)[s.body[SnakeLength-1]] = true
 		// println(s.head.distance(&s.tail))
 	}
 
@@ -50,10 +93,14 @@ func print_snakemap(s *snake, sm *[MapSize][MapSize]string) {
 	for y := MapSize - 1; y >= 0; y-- {
 		for x := 0; x < MapSize; x++ {
 			char := "."
-			if x == s.head.x && y == s.head.y {
-				char = "H"
-			} else if x == s.tail.x && y == s.tail.y {
-				char = "T"
+			for i, v := range s.body {
+				if x == v.x && y == v.y {
+					if i == 0 {
+						char = "H"
+					} else {
+						char = tj.Int2str(i)
+					}
+				}
 			}
 			print(char)
 		}
@@ -71,9 +118,9 @@ func main() {
 			snakemap[i][j] = "."
 		}
 	}
-	s := snake{vec2{0, 0}, vec2{0, 0}}
+	s := snake{}
 
-	// print_snakemap(&s, &snakemap)
+	print_snakemap(&s, &snakemap)
 
 	tail_positions := map[vec2]bool{}
 

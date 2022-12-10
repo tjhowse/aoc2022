@@ -1,7 +1,9 @@
 package main
 
 import (
+	"log"
 	"strings"
+	"time"
 
 	tj "github.com/tjhowse/tjgo"
 )
@@ -40,6 +42,7 @@ func better_dupe(s string) bool {
 func main() {
 	// b := tj.FileToSlice("input")
 	b := tj.FileToSlice("input_real")
+	start := time.Now()
 	// println(len(b))
 	// c := tj.DoRegex("123-45", `(\d+)-(\d+)`)
 	// for _, i := range c {
@@ -65,7 +68,9 @@ func main() {
 	n := 14
 	for i := n; i < len(input); i++ {
 		if better_dupe(input[i-n : i]) {
-			print(i)
+			elapsed := time.Since(start)
+			println(i)
+			log.Printf("%s", elapsed)
 			return
 		}
 	}
